@@ -112,7 +112,7 @@ impl ProviderInterface for JsonRpcCachedProvider {
         self.provider.get_block_number().await
     }
 
-    pub async fn get_logs(
+    async fn get_logs(
         &self,
         filter: &RindexerEventFilter,
     ) -> Result<Vec<WrappedLog>, ProviderError> {
@@ -185,7 +185,7 @@ impl ProviderInterface for HyperSyncProvider {
             .map_err(|err| ProviderError::CustomError(err.to_string()))
     }
 
-    async fn get_logs(&self, filter: &RindexerEventFilter) -> Result<Vec<Log>, ProviderError> {
+    async fn get_logs(&self, filter: &RindexerEventFilter) -> Result<Vec<WrappedLog>, ProviderError> {
         let raw_filter = filter.raw_filter().clone();
 
         let all_log_fields: BTreeSet<String> =
@@ -260,8 +260,11 @@ impl ProviderInterface for HyperSyncProvider {
             .logs
             .into_iter()
             .flatten()
-            .filter_map(|log| log.try_into().ok())
-            .collect::<Vec<Log>>())
+            .filter_map(|log| {
+                let log = log.try_into().ok()?;
+                Some(WrappedLog{inner: log, block_timestamp: None})
+            })
+            .collect::<Vec<WrappedLog>>())
 
     }
 
@@ -363,7 +366,7 @@ impl CreateNetworkProvider {
         for network in &manifest.networks {
             let provider = create_client(
                 &network.rpc,
-                network.kind.clone(),
+                network.kind,
                 network.compute_units_per_second,
                 network.max_block_range,
                 manifest.get_custom_headers(),

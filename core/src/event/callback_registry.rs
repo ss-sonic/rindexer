@@ -35,6 +35,7 @@ pub struct TxInformation {
     pub transaction_hash: H256,
     pub log_index: U256,
     pub transaction_index: U64,
+    pub input: String,
 }
 
 #[derive(Debug, Clone)]
@@ -72,6 +73,7 @@ impl EventResult {
                 transaction_hash: log_meta.transaction_hash,
                 transaction_index: log_meta.transaction_index,
                 log_index: log_meta.log_index,
+                input: log.input.unwrap_or_default(),
             },
             found_in_request: LogFoundInRequest { from_block: start_block, to_block: end_block },
         }

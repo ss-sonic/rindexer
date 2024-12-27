@@ -7,7 +7,7 @@ use ethers::{
     middleware::Middleware,
     prelude::Log,
     providers::{Http, Provider, ProviderError, RetryClient, RetryClientBuilder},
-    types::{Block, BlockNumber, H256, U256, U64},
+    types::{Block, BlockNumber, Transaction, H256, U256, U64},
 };
 use reqwest::header::HeaderMap;
 use serde::{Deserialize, Serialize};
@@ -32,6 +32,8 @@ pub struct WrappedLog {
     #[serde(rename = "blockTimestamp")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub block_timestamp: Option<U256>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub input: Option<String>,
 }
 
 impl JsonRpcCachedProvider {
@@ -87,6 +89,15 @@ impl JsonRpcCachedProvider {
 
     pub async fn get_chain_id(&self) -> Result<U256, ProviderError> {
         self.provider.get_chainid().await
+    }
+    // enable cache for this
+
+    pub async fn get_transaction(
+        &self,
+        tx_hash: H256,
+    ) -> Result<Option<Transaction>, ProviderError> {
+        let result = self.provider.get_transaction(tx_hash).await?;
+        Ok(result)
     }
 
     pub fn get_inner_provider(&self) -> Arc<Provider<RetryClient<Http>>> {

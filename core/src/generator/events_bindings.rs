@@ -785,7 +785,7 @@ pub fn generate_event_handlers(
             csv_data.push_str(r#"result.tx_information.network.to_string(),"#);
             csv_data.push_str(r#"result.tx_information.transaction_index.to_string(),"#);
             csv_data.push_str(r#"result.tx_information.log_index.to_string()"#);
-
+            csv_data.push_str(r#"result.tx_information.input.to_string()"#);
             csv_write = format!(r#"csv_bulk_data.push(vec![{csv_data}]);"#, csv_data = csv_data,);
 
             if storage.postgres_disable_create_tables() {
@@ -849,6 +849,9 @@ pub fn generate_event_handlers(
             );
             data.push_str("EthereumSqlTypeWrapper::U64(result.tx_information.transaction_index),");
             data.push_str("EthereumSqlTypeWrapper::U256(result.tx_information.log_index)");
+            data.push_str(
+                "EthereumSqlTypeWrapper::String(result.tx_information.input.to_string()),",
+            );
             data.push_str("];");
 
             postgres_write = format!(

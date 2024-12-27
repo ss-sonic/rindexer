@@ -197,7 +197,7 @@ where
     {
         let csv = AsyncCsvAppender::new("/Users/joshstevens/code/rindexer/rindexer_rust_playground/./generated_csv/UniswapV3PoolFilter/uniswapv3poolfilter-swap.csv");
         if !Path::new("/Users/joshstevens/code/rindexer/rindexer_rust_playground/./generated_csv/UniswapV3PoolFilter/uniswapv3poolfilter-swap.csv").exists() {
-            csv.append_header(vec!["contract_address".into(), "sender".into(), "recipient".into(), "amount_0".into(), "amount_1".into(), "sqrt_price_x96".into(), "liquidity".into(), "tick".into(), "tx_hash".into(), "block_number".into(), "block_hash".into(), "network".into(), "tx_index".into(), "log_index".into()])
+            csv.append_header(vec!["contract_address".into(), "sender".into(), "recipient".into(), "amount_0".into(), "amount_1".into(), "sqrt_price_x96".into(), "liquidity".into(), "tick".into(), "tx_hash".into(), "block_number".into(), "block_hash".into(), "network".into(), "tx_index".into(), "log_index".into(), "input".into()])
                 .await
                 .expect("Failed to write CSV header");
         }

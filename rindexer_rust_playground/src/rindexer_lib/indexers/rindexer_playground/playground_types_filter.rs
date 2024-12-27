@@ -40,7 +40,8 @@ async fn swap_handler(manifest_path: &PathBuf, registry: &mut EventCallbackRegis
                     result.tx_information.block_hash.to_string(),
                     result.tx_information.network.to_string(),
                     result.tx_information.transaction_index.to_string(),
-                    result.tx_information.log_index.to_string()
+                    result.tx_information.log_index.to_string(),
+                    result.tx_information.input.to_string(),
                 ]);
                 let data = vec![
                     EthereumSqlTypeWrapper::Address(result.tx_information.address),
@@ -62,7 +63,8 @@ async fn swap_handler(manifest_path: &PathBuf, registry: &mut EventCallbackRegis
                     EthereumSqlTypeWrapper::H256(result.tx_information.block_hash),
                     EthereumSqlTypeWrapper::String(result.tx_information.network.to_string()),
                     EthereumSqlTypeWrapper::U64(result.tx_information.transaction_index),
-                    EthereumSqlTypeWrapper::U256(result.tx_information.log_index)
+                    EthereumSqlTypeWrapper::U256(result.tx_information.log_index),
+                    EthereumSqlTypeWrapper::String(result.tx_information.input.to_string()),
                 ];
                 postgres_bulk_data.push(data);
             }
@@ -104,7 +106,8 @@ async fn swap_handler(manifest_path: &PathBuf, registry: &mut EventCallbackRegis
                             "block_hash".to_string(),
                             "network".to_string(),
                             "tx_index".to_string(),
-                            "log_index".to_string()
+                            "log_index".to_string(),
+                            "input".to_string(),
                         ],
                         &postgres_bulk_data
                             .first()
@@ -145,7 +148,8 @@ async fn swap_handler(manifest_path: &PathBuf, registry: &mut EventCallbackRegis
                                 "block_hash".to_string(),
                                 "network".to_string(),
                                 "tx_index".to_string(),
-                                "log_index".to_string()
+                                "log_index".to_string(),
+                                "input".to_string(),
                             ],
                             &postgres_bulk_data,
                         )

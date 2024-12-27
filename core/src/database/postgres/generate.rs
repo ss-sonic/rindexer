@@ -35,6 +35,7 @@ pub fn generate_column_names_only_with_base_properties(inputs: &[ABIInput]) -> V
         "network".to_string(),
         "tx_index".to_string(),
         "log_index".to_string(),
+        "input".to_string(),
     ]);
     column_names
 }
@@ -66,7 +67,8 @@ fn generate_event_table_sql_with_comments(
                 block_hash CHAR(66) NOT NULL, \
                 network VARCHAR(50) NOT NULL, \
                 tx_index NUMERIC NOT NULL, \
-                log_index VARCHAR(78) NOT NULL\
+                log_index VARCHAR(78) NOT NULL, \
+                input TEXT\
             );",
                 table_name, event_columns
             );

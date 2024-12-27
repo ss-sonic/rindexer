@@ -191,6 +191,7 @@ fn no_code_callback(params: Arc<NoCodeCallbackParams>) -> EventCallbackType {
                     let network = result.tx_information.network.to_string();
                     let transaction_index = result.tx_information.transaction_index;
                     let log_index = result.tx_information.log_index;
+                    let input = result.tx_information.input.to_string();
 
                     let event_parameters: Vec<EthereumSqlTypeWrapper> =
                         map_log_params_to_ethereum_wrapper(&params.event_info.inputs, &log.params);
@@ -203,6 +204,7 @@ fn no_code_callback(params: Arc<NoCodeCallbackParams>) -> EventCallbackType {
                         EthereumSqlTypeWrapper::String(network.to_string()),
                         EthereumSqlTypeWrapper::U64(transaction_index),
                         EthereumSqlTypeWrapper::U256(log_index),
+                        EthereumSqlTypeWrapper::String(input.to_string()),
                     ];
 
                     Some((
@@ -217,6 +219,7 @@ fn no_code_callback(params: Arc<NoCodeCallbackParams>) -> EventCallbackType {
                         contract_address,
                         event_parameters,
                         end_global_parameters,
+                        input,
                     ))
                 })
                 .collect();
@@ -233,6 +236,7 @@ fn no_code_callback(params: Arc<NoCodeCallbackParams>) -> EventCallbackType {
                 contract_address,
                 event_parameters,
                 end_global_parameters,
+                input,
             ) in owned_results
             {
                 if params.streams_clients.is_some() || params.chat_clients.is_some() {
@@ -248,6 +252,7 @@ fn no_code_callback(params: Arc<NoCodeCallbackParams>) -> EventCallbackType {
                             block_timestamp: None,
                             log_index,
                             transaction_index,
+                            input,
                         },
                         false,
                     );

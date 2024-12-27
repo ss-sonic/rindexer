@@ -334,6 +334,7 @@ impl EventInfo {
         headers.push(r#"network"#.to_string());
         headers.push(r#"tx_index"#.to_string());
         headers.push(r#"log_index"#.to_string());
+        headers.push(r#"input"#.to_string());
 
         headers
     }

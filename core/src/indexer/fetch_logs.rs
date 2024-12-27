@@ -177,6 +177,10 @@ async fn fetch_historic_logs_stream(
 
     match cached_provider.get_logs(&current_filter).await {
         Ok(logs) => {
+            // let mut logs = logs;
+            // if let Err(e) = enrich_logs_with_tx_data(cached_provider, &mut logs).await {
+            //     error!("{} - Failed to enrich logs with tx data: {}", info_log_name, e);
+            // }
             debug!(
                 "{} - {} - topic_id {}, Logs: {} from {} to {}",
                 info_log_name,
@@ -418,6 +422,15 @@ async fn live_indexing_stream(
                         if let Ok(permit) = permit {
                             match cached_provider.get_logs(&current_filter).await {
                                 Ok(logs) => {
+                                    let mut logs = logs;
+                                    if let Err(e) =
+                                        enrich_logs_with_tx_data(cached_provider, &mut logs).await
+                                    {
+                                        error!(
+                                            "{} - Failed to enrich logs with tx data: {}",
+                                            info_log_name, e
+                                        );
+                                    }
                                     debug!(
                                         "{} - {} - Live topic_id {}, Logs: {} from {} to {}",
                                         info_log_name,
@@ -640,4 +653,18 @@ fn calculate_process_historic_log_to_block(
     } else {
         *snapshot_to_block
     }
+}
+
+pub async fn enrich_logs_with_tx_data(
+    provider: &Arc<JsonRpcCachedProvider>,
+    logs: &mut Vec<WrappedLog>,
+) -> Result<(), Box<dyn Error + Send>> {
+    for log in logs.iter_mut() {
+        if let Some(tx_hash) = log.inner.transaction_hash {
+            if let Ok(Some(tx)) = provider.get_transaction(tx_hash).await {
+                log.input = Some(tx.input.to_string());
+            }
+        }
+    }
+    Ok(())
 }

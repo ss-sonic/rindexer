@@ -11,6 +11,10 @@ pub struct Network {
 
     pub rpc: String,
 
+    pub ws: Option<String>,
+
+    pub enable_native_transfers: Option<bool>,
+
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub compute_units_per_second: Option<u64>,
 

@@ -140,7 +140,7 @@ where
     {
         let csv = AsyncCsvAppender::new("/Users/joshstevens/code/rindexer/rindexer_rust_playground/./generated_csv/ERC20Filter/erc20filter-approval.csv");
         if !Path::new("/Users/joshstevens/code/rindexer/rindexer_rust_playground/./generated_csv/ERC20Filter/erc20filter-approval.csv").exists() {
-            csv.append_header(vec!["contract_address".into(), "owner".into(), "spender".into(), "value".into(), "tx_hash".into(), "block_number".into(), "block_hash".into(), "network".into(), "tx_index".into(), "log_index".into()])
+            csv.append_header(vec!["contract_address".into(), "owner".into(), "spender".into(), "value".into(), "tx_hash".into(), "block_number".into(), "block_hash".into(), "network".into(), "tx_index".into(), "log_index".into(), "input".into()])
                 .await
                 .expect("Failed to write CSV header");
         }
@@ -235,7 +235,7 @@ where
     {
         let csv = AsyncCsvAppender::new("/Users/joshstevens/code/rindexer/rindexer_rust_playground/./generated_csv/ERC20Filter/erc20filter-transfer.csv");
         if !Path::new("/Users/joshstevens/code/rindexer/rindexer_rust_playground/./generated_csv/ERC20Filter/erc20filter-transfer.csv").exists() {
-            csv.append_header(vec!["contract_address".into(), "from".into(), "to".into(), "value".into(), "tx_hash".into(), "block_number".into(), "block_hash".into(), "network".into(), "tx_index".into(), "log_index".into()])
+            csv.append_header(vec!["contract_address".into(), "from".into(), "to".into(), "value".into(), "tx_hash".into(), "block_number".into(), "block_hash".into(), "network".into(), "tx_index".into(), "log_index".into(), "input".into()])
                 .await
                 .expect("Failed to write CSV header");
         }

@@ -9,7 +9,7 @@ just focus on the logic you want.
 By default if you turn storage postgres on in the YAML configuration file it will also create you postgres tables,
 also write SQL for you to use and expose you a postgres client. This is a great starting point for you to build on.
 
-The tables creation can be skipped by using the [disable_create_tables](docs/start-building/yaml-config/storage#disable_create_tables) 
+The tables creation can be skipped by using the [disable_create_tables](docs/start-building/yaml-config/storage#disable_create_tables)
 in the YAML configuration file.
 
 If you also enable the CSV storage it will also generate code in the handler to write to that CSV files.
@@ -34,22 +34,22 @@ description: My first rindexer project
 repository: https://github.com/joshstevens19/rindexer
 project_type: rust
 networks:
-- name: ethereum
-  chain_id: 1
-  rpc: https://mainnet.gateway.tenderly.co
+  - name: ethereum
+    chain_id: 1
+    rpc: https://mainnet.gateway.tenderly.co
 storage:
   postgres:
     enabled: true
 contracts:
-- name: RocketPoolETH
-  details:
-  - network: ethereum
-    address: "0xae78736cd615f374d3085123a210448e74fc6393"
-    start_block: 18900000
-    end_block: 19000000
-  abi: ./abis/RocketTokenRETH.abi.json
-  include_events:
-    - Transfer
+  - name: RocketPoolETH
+    details:
+      - network: ethereum
+        address: "0xae78736cd615f374d3085123a210448e74fc6393"
+        start_block: 18900000
+        end_block: 19000000
+    abi: ./abis/RocketTokenRETH.abi.json
+    include_events:
+      - Transfer
 ```
 
 This would generate you a `rocket_pool_eth.rs` file in the indexers folder, this file will have a handler function,
@@ -90,6 +90,8 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
                         EthereumSqlTypeWrapper::U64(result.tx_information.block_number),
                         EthereumSqlTypeWrapper::H256(result.tx_information.block_hash),
                         EthereumSqlTypeWrapper::String(result.tx_information.network.to_string()),
+                        EthereumSqlTypeWrapper::String(result.tx_information.input.to_string()),
+
                     ];
                     bulk_data.push(data);
                 }
@@ -276,6 +278,7 @@ pub struct TxInformation {
     pub transaction_hash: H256,
     pub log_index: U256,
     pub transaction_index: U64,
+    pub input: String,
 }
 ```
 
@@ -361,7 +364,6 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
 }
 ```
 
-
 ## Extensions
 
 You can also pass in your own custom thread safe extensions to the context if you wish, this is a way to pass in custom logic.
@@ -429,22 +431,22 @@ description: My first rindexer project
 repository: https://github.com/joshstevens19/rindexer
 project_type: rust
 networks:
-- name: ethereum // [!code focus]
-  chain_id: 1
-  rpc: https://mainnet.gateway.tenderly.co
+  - name: ethereum // [!code focus]
+    chain_id: 1
+    rpc: https://mainnet.gateway.tenderly.co
 storage:
   postgres:
     enabled: true
 contracts:
-- name: RocketPoolETH
-  details:
-  - network: ethereum
-    address: "0xae78736cd615f374d3085123a210448e74fc6393"
-    start_block: 18900000
-    end_block: 19000000
-  abi: ./abis/RocketTokenRETH.abi.json
-  include_events:
-    - Transfer
+  - name: RocketPoolETH
+    details:
+      - network: ethereum
+        address: "0xae78736cd615f374d3085123a210448e74fc6393"
+        start_block: 18900000
+        end_block: 19000000
+    abi: ./abis/RocketTokenRETH.abi.json
+    include_events:
+      - Transfer
 ```
 
 for example with network `ethereum` the provider function would be `get_ethereum_provider`.
@@ -480,7 +482,6 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
 :::info
 You can also pass in the provider to the extensions if you wish to use it in the handler using the context struct.
 :::
-
 
 ## External Contract calls
 
@@ -569,7 +570,6 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
 If you have defined [multiple addresses](/docs/start-building/yaml-config/contracts#address) for a contract in the YAML configuration file
 you have to pass in the address into the contract function.
 
-
 ```rs
 use crate::rindexer_lib::typings::global_contracts::usdt_contract; // [!code focus]
 
@@ -609,16 +609,16 @@ in snake case with `_contract` appended to it.
 
 ```yaml
 contracts:
-- name: RocketPoolETH // [!code focus]
-  details:
-  - network: ethereum
-    address: "0xae78736cd615f374d3085123a210448e74fc6393"
-    start_block: 18900000
-    end_block: 19000000
-  abi: ./abis/RocketTokenRETH.abi.json
-  include_events:
-    - Transfer // [!code focus]
-    - Approval
+  - name: RocketPoolETH // [!code focus]
+    details:
+      - network: ethereum
+        address: "0xae78736cd615f374d3085123a210448e74fc6393"
+        start_block: 18900000
+        end_block: 19000000
+    abi: ./abis/RocketTokenRETH.abi.json
+    include_events:
+      - Transfer // [!code focus]
+      - Approval
 ```
 
 ```rs
@@ -652,7 +652,7 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
 
 #### Multiple addresses
 
-If you have defined [multiple addresses](/docs/start-building/yaml-config/contracts#address) or you have a [filter](/docs/start-building/yaml-config/contracts#filter) 
+If you have defined [multiple addresses](/docs/start-building/yaml-config/contracts#address) or you have a [filter](/docs/start-building/yaml-config/contracts#filter)
 for a contract in the YAML configuration file you will have to pass in the address into the contract function.
 
 ```rs
@@ -721,23 +721,23 @@ description: My first rindexer project
 repository: https://github.com/joshstevens19/rindexer
 project_type: rust
 networks:
-- name: ethereum
-  chain_id: 1
-  rpc: https://mainnet.gateway.tenderly.co
+  - name: ethereum
+    chain_id: 1
+    rpc: https://mainnet.gateway.tenderly.co
 storage:
   postgres:
     enabled: true
     disable_create_tables: true // [!code focus]
 contracts:
-- name: RocketPoolETH
-  details:
-  - network: ethereum
-    address: "0xae78736cd615f374d3085123a210448e74fc6393"
-    start_block: 18900000
-    end_block: 19000000
-  abi: ./abis/RocketTokenRETH.abi.json
-  include_events:
-  - Transfer
+  - name: RocketPoolETH
+    details:
+      - network: ethereum
+        address: "0xae78736cd615f374d3085123a210448e74fc6393"
+        start_block: 18900000
+        end_block: 19000000
+    abi: ./abis/RocketTokenRETH.abi.json
+    include_events:
+      - Transfer
 ```
 
 You can query data from the database and write data to the database, here are the postgres methods exposed.
@@ -885,8 +885,8 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
 
 ### Disable CSV Create Headers
 
-If you turn on csv storage then by default rindexer will create headers for you automatically inline with the ABI event data. 
-The CSV header creation can be skipped by using the [disable_create_headers](/docs/start-building/yaml-config/storage#disable_create_headers) 
+If you turn on csv storage then by default rindexer will create headers for you automatically inline with the ABI event data.
+The CSV header creation can be skipped by using the [disable_create_headers](/docs/start-building/yaml-config/storage#disable_create_headers)
 in the YAML configuration file.
 
 ```yaml
@@ -895,23 +895,23 @@ description: My first rindexer project
 repository: https://github.com/joshstevens19/rindexer
 project_type: rust
 networks:
-- name: ethereum
-  chain_id: 1
-  rpc: https://mainnet.gateway.tenderly.co
+  - name: ethereum
+    chain_id: 1
+    rpc: https://mainnet.gateway.tenderly.co
 storage:
   csv:
     enabled: true
     disable_create_headers: true // [!code focus]
 contracts:
-- name: RocketPoolETH
-  details:
-  - network: ethereum
-    address: "0xae78736cd615f374d3085123a210448e74fc6393"
-    start_block: 18900000
-    end_block: 19000000
-  abi: ./abis/RocketTokenRETH.abi.json
-  include_events:
-  - Transfer
+  - name: RocketPoolETH
+    details:
+      - network: ethereum
+        address: "0xae78736cd615f374d3085123a210448e74fc6393"
+        start_block: 18900000
+        end_block: 19000000
+    abi: ./abis/RocketTokenRETH.abi.json
+    include_events:
+      - Transfer
 ```
 
 ## register
@@ -934,7 +934,6 @@ async fn transfer_handler(registry: &mut EventCallbackRegistry) {
     .register(registry); // [!code focus]
 }
 ```
-
 
 The `main.rs` calls the `register_all_handlers` function which lives in `all_handlers.rs` this registers all the handlers, this code is
 all generated for you and you do not need to worry about it.
@@ -1029,7 +1028,7 @@ async fn main() {
 
 ```
 
-### Running 
+### Running
 
 If you want to run this with docker support for the postgres first run:
 

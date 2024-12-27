@@ -20,7 +20,7 @@ use crate::{
     },
     indexer::{
         dependency::{ContractEventsDependenciesConfig, EventDependencies},
-        fetch_logs::{fetch_logs_stream, FetchLogsResult},
+        fetch_logs::{enrich_logs_with_tx_data, fetch_logs_stream, FetchLogsResult},
         last_synced::update_progress_and_last_synced_task,
         log_helpers::is_relevant_block,
         progress::IndexingEventProgressStatus,
@@ -380,6 +380,18 @@ async fn live_indexing_for_contract_event_dependencies<'a>(
                                     .await
                                 {
                                     Ok(logs) => {
+                                        let mut logs = logs;
+                                        if let Err(e) = enrich_logs_with_tx_data(
+                                            &config.network_contract.cached_provider,
+                                            &mut logs,
+                                        )
+                                        .await
+                                        {
+                                            error!(
+                                                "{} - Failed to enrich logs with tx data: {}",
+                                                &config.info_log_name, e
+                                            );
+                                        }
                                         debug!(
                                             "{} - {} - Live topic_id {}, Logs: {} from {} to {}",
                                             &config.info_log_name,

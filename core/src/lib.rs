@@ -1,4 +1,5 @@
 // public
+pub mod enrichment;
 pub mod generator;
 pub mod indexer;
 pub mod manifest;

@@ -13,8 +13,9 @@ use crate::{
     },
     event::callback_registry::EventCallbackRegistry,
     indexer::{
+        native_transfer::NativeTransferIndexer,
         no_code::{setup_no_code, SetupNoCodeError},
-        start::{start_indexing, StartIndexingError},
+        start::{initialize_database, start_indexing, StartIndexingError},
         ContractEventDependencies, ContractEventDependenciesMapFromRelationshipsError,
     },
     initiate_shutdown,
@@ -148,7 +149,6 @@ pub async fn start_rindexer(details: StartDetails<'_>) -> Result<(), StartRindex
             if graphql_server_handle.is_none() && details.graphql_details.enabled {
                 error!("GraphQL can not run without postgres storage enabled, you have tried to run GraphQL which will now be skipped.");
             }
-
             if let Some(mut indexing_details) = details.indexing_details {
                 let postgres_enabled = &manifest.storage.postgres_enabled();
 
@@ -168,7 +168,23 @@ pub async fn start_rindexer(details: StartDetails<'_>) -> Result<(), StartRindex
 
                 let mut dependencies: Vec<ContractEventDependencies> =
                     ContractEventDependencies::parse(&manifest);
+                // let network_providers = CreateNetworkProvider::create(&manifest);
 
+                let database = initialize_database(&manifest).await?;
+
+                if manifest.storage.postgres_enabled() {
+                    info!("Starting native transfer indexer");
+                    if let Some(postgres) = &database {
+                        let native_transfer_indexer = NativeTransferIndexer::new(
+                            postgres.clone(),
+                            manifest.networks.clone(),
+                            manifest.name.clone(),
+                        );
+                        tokio::spawn(async move {
+                            native_transfer_indexer.start().await;
+                        });
+                    }
+                }
                 let processed_network_contracts = start_indexing(
                     &manifest,
                     project_path,

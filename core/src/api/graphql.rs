@@ -18,7 +18,7 @@ use crate::{
     database::postgres::{
         client::connection_string, generate::generate_indexer_contract_schema_name,
     },
-    helpers::{kill_process_on_port, set_thread_no_logging},
+    helpers::{camel_to_snake, kill_process_on_port, set_thread_no_logging},
     indexer::Indexer,
     manifest::graphql::GraphQLSettings,
 };
@@ -103,7 +103,7 @@ pub async fn start_graphql_server(
 ) -> Result<GraphQLServer, StartGraphqlServerError> {
     info!("Starting GraphQL server");
 
-    let schemas: Vec<String> = indexer
+    let mut schemas: Vec<String> = indexer
         .contracts
         .iter()
         .map(move |contract| {
@@ -113,7 +113,7 @@ pub async fn start_graphql_server(
             )
         })
         .collect();
-
+    schemas.push(format!("{}_native", camel_to_snake(&indexer.name)));
     let connection_string = connection_string()?;
     let port = settings.port;
     let graphql_endpoint = format!("http://localhost:{}/graphql", &port);

@@ -165,6 +165,54 @@ pub fn generate_tables_for_indexer_sql(
 ) -> Result<Code, GenerateTablesForIndexerSqlError> {
     let mut sql = "CREATE SCHEMA IF NOT EXISTS rindexer_internal;".to_string();
 
+    // 1) Construct the native schema name
+    let native_schema_name = format!("{}_native", camel_to_snake(&indexer.name));
+    sql.push_str(&format!("CREATE SCHEMA IF NOT EXISTS {};", native_schema_name));
+
+    // 2) Create native_transfers table inside <indexer_name>_native schema
+    let native_transfers_sql = format!(
+        "CREATE TABLE IF NOT EXISTS {}.native_transfers (\
+            rindexer_id SERIAL PRIMARY KEY NOT NULL, \
+            timestamp TIMESTAMPTZ NOT NULL, \
+            input TEXT NOT NULL, \
+            \"to\" CHAR(42) NOT NULL, \
+            \"from\" CHAR(42) NOT NULL, \
+            tx_hash VARCHAR(78) NOT NULL, \
+            value VARCHAR(78) NOT NULL, \
+            block_number VARCHAR(78) NOT NULL, \
+            nonce VARCHAR(78) NOT NULL, \
+            gas VARCHAR(78) NOT NULL, \
+            gas_price VARCHAR(78) NOT NULL, \
+            network VARCHAR(50) NOT NULL\
+        );",
+        native_schema_name
+    );
+    sql.push_str(&native_transfers_sql);
+    sql.push_str("\n");
+
+    // 3) Add comment so Postgraphile picks up a friendly GraphQL name
+    let native_transfers_comment = format!(
+        "COMMENT ON TABLE {}.native_transfers IS E'@name NativeTransfer';",
+        native_schema_name
+    );
+    sql.push_str(&native_transfers_comment);
+    sql.push_str("\n");
+
+    // 4) Create indexes in the <indexer_name>_native schema
+    sql.push_str(&format!(
+        "
+        CREATE INDEX IF NOT EXISTS idx_native_transfers_network ON {}.native_transfers(network);
+        CREATE INDEX IF NOT EXISTS idx_native_transfers_from ON {}.native_transfers(\"from\");
+        CREATE INDEX IF NOT EXISTS idx_native_transfers_to ON {}.native_transfers(\"to\");
+        CREATE INDEX IF NOT EXISTS idx_native_transfers_block_number ON {}.native_transfers(block_number);
+        CREATE INDEX IF NOT EXISTS idx_native_transfers_timestamp ON {}.native_transfers(timestamp);
+        ",
+        native_schema_name,
+        native_schema_name,
+        native_schema_name,
+        native_schema_name,
+        native_schema_name
+    ));
     for contract in &indexer.contracts {
         let contract_name = contract.before_modify_name_if_filter_readonly();
         let abi_items = ABIItem::read_abi_items(project_path, contract)?;

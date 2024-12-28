@@ -18,6 +18,7 @@ use crate::{
     indexer::{
         dependency::ContractEventsDependenciesConfig,
         last_synced::{get_last_synced_block_number, SyncConfig},
+        // native_transfer::NativeTransferIndexer,
         process::{
             process_contracts_events_with_dependencies, process_event,
             ProcessContractsEventsWithDependenciesError, ProcessEventError,
@@ -27,6 +28,7 @@ use crate::{
         ContractEventDependencies,
     },
     manifest::core::Manifest,
+    // provider::CreateNetworkProvider,
     PostgresClient,
 };
 
@@ -301,7 +303,7 @@ pub async fn start_indexing(
     Ok(processed_network_contracts)
 }
 
-async fn initialize_database(
+pub async fn initialize_database(
     manifest: &Manifest,
 ) -> Result<Option<Arc<PostgresClient>>, StartIndexingError> {
     if manifest.storage.postgres_enabled() {

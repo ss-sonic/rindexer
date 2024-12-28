@@ -9,7 +9,7 @@ resolver = "2"
 rindexer = { path = "../core" }
 
 # external dependencies
-ethers = { version = "2.0", features = ["rustls", "openssl"] }
+ethers = { version = "2.0", features = ["rustls", "openssl", "ws"] }
 ethers-etherscan = "2.0.14"
 clap = { version = "4.4.11", features = ["derive"] }
 regex = "1.5.4"

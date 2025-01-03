@@ -393,6 +393,7 @@ where
                     cached_provider: self.get_provider(&c.network),
                     decoder: self.decoder(&c.network),
                     indexing_contract_setup: c.indexing_contract_setup(),
+                    include_tx_data: c.include_tx_data,
                     start_block: c.start_block,
                     end_block: c.end_block,
                     disable_logs_bloom_checks: rindexer_yaml

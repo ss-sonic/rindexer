@@ -18,6 +18,7 @@ use crate::{
 pub struct NetworkContract {
     pub id: String,
     pub network: String,
+    pub include_tx_data: Option<bool>,
     pub indexing_contract_setup: IndexingContractSetup,
     pub cached_provider: Arc<JsonRpcCachedProvider>,
     pub decoder: Decoder,
@@ -70,6 +71,7 @@ impl ContractInformation {
                     details.push(NetworkContract {
                         id: generate_random_id(10),
                         network: c.network.clone(),
+                        include_tx_data: c.include_tx_data,
                         cached_provider: Arc::clone(&provider.client),
                         decoder: Arc::clone(&decoder),
                         indexing_contract_setup: c.indexing_contract_setup(),

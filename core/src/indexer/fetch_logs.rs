@@ -70,6 +70,7 @@ pub fn fetch_logs_stream(
                         max_block_range_limitation,
                         snapshot_to_block,
                         &config.info_log_name,
+                        config.network_contract.include_tx_data.unwrap_or(false),
                     )
                     .await;
 
@@ -121,6 +122,7 @@ pub fn fetch_logs_stream(
                 &config.info_log_name,
                 &config.semaphore,
                 config.network_contract.disable_logs_bloom_checks,
+                config.network_contract.include_tx_data.unwrap_or(true),
             )
             .await;
         }
@@ -142,6 +144,7 @@ async fn fetch_historic_logs_stream(
     max_block_range_limitation: Option<U64>,
     snapshot_to_block: U64,
     info_log_name: &str,
+    include_tx_data: bool,
 ) -> Option<ProcessHistoricLogsStreamResult> {
     let from_block = current_filter.get_from_block();
     let to_block = current_filter.get_to_block();
@@ -177,10 +180,12 @@ async fn fetch_historic_logs_stream(
 
     match cached_provider.get_logs(&current_filter).await {
         Ok(logs) => {
-            // let mut logs = logs;
-            // if let Err(e) = enrich_logs_with_tx_data(cached_provider, &mut logs).await {
-            //     error!("{} - Failed to enrich logs with tx data: {}", info_log_name, e);
-            // }
+            let mut logs = logs;
+            if include_tx_data {
+                if let Err(e) = enrich_logs_with_tx_data(cached_provider, &mut logs).await {
+                    error!("{} - Failed to enrich logs with tx data: {}", info_log_name, e);
+                }
+            }
             debug!(
                 "{} - {} - topic_id {}, Logs: {} from {} to {}",
                 info_log_name,
@@ -331,6 +336,7 @@ async fn live_indexing_stream(
     info_log_name: &str,
     semaphore: &Arc<Semaphore>,
     disable_logs_bloom_checks: bool,
+    include_tx_data: bool,
 ) {
     let mut last_seen_block_number = U64::from(0);
 
@@ -423,13 +429,16 @@ async fn live_indexing_stream(
                             match cached_provider.get_logs(&current_filter).await {
                                 Ok(logs) => {
                                     let mut logs = logs;
-                                    if let Err(e) =
-                                        enrich_logs_with_tx_data(cached_provider, &mut logs).await
-                                    {
-                                        error!(
-                                            "{} - Failed to enrich logs with tx data: {}",
-                                            info_log_name, e
-                                        );
+                                    if include_tx_data {
+                                        if let Err(e) =
+                                            enrich_logs_with_tx_data(cached_provider, &mut logs)
+                                                .await
+                                        {
+                                            error!(
+                                                "{} - Failed to enrich logs with tx data: {}",
+                                                info_log_name, e
+                                            );
+                                        }
                                     }
                                     debug!(
                                         "{} - {} - Live topic_id {}, Logs: {} from {} to {}",

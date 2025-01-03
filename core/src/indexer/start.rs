@@ -194,7 +194,6 @@ pub async fn start_indexing(
                 id: event.id.clone(),
                 project_path: project_path.to_path_buf(),
                 indexer_name: event.indexer_name.clone(),
-                include_tx_data: true,
                 contract_name: event.contract.name.clone(),
                 info_log_name: event.info_log_name(),
                 topic_id: event.topic_id,

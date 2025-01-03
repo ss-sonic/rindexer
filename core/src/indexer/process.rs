@@ -216,7 +216,7 @@ async fn process_contract_events_with_dependencies(
         return Ok(());
     }
 
-    live_indexing_for_contract_event_dependencies(&live_indexing_events).await;
+    live_indexing_for_contract_event_dependencies(&live_indexing_events, true).await;
 
     Ok(())
 }
@@ -229,6 +229,7 @@ async fn live_indexing_for_contract_event_dependencies<'a>(
         'a,
         Vec<(Arc<EventProcessingConfig>, RindexerEventFilter)>,
     >,
+    include_tx_data: bool,
 ) {
     let mut ordering_live_indexing_details_map: HashMap<
         H256,
@@ -381,16 +382,18 @@ async fn live_indexing_for_contract_event_dependencies<'a>(
                                 {
                                     Ok(logs) => {
                                         let mut logs = logs;
-                                        if let Err(e) = enrich_logs_with_tx_data(
-                                            &config.network_contract.cached_provider,
-                                            &mut logs,
-                                        )
-                                        .await
-                                        {
-                                            error!(
-                                                "{} - Failed to enrich logs with tx data: {}",
-                                                &config.info_log_name, e
-                                            );
+                                        if include_tx_data {
+                                            if let Err(e) = enrich_logs_with_tx_data(
+                                                &config.network_contract.cached_provider,
+                                                &mut logs,
+                                            )
+                                            .await
+                                            {
+                                                error!(
+                                                    "{} - Failed to enrich logs with tx data: {}",
+                                                    &config.info_log_name, e
+                                                );
+                                            }
                                         }
                                         debug!(
                                             "{} - {} - Live topic_id {}, Logs: {} from {} to {}",

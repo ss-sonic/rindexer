@@ -56,6 +56,8 @@ pub struct FilterDetailsYaml {
 pub struct ContractDetails {
     pub network: String,
 
+    pub include_tx_data: Option<bool>,
+
     #[serde(default, skip_serializing_if = "Option::is_none")]
     address: Option<ValueOrArray<Address>>,
 
@@ -130,6 +132,7 @@ impl ContractDetails {
     ) -> Self {
         Self {
             network,
+            include_tx_data: None,
             address: Some(address),
             filter: None,
             indexed_filters,
